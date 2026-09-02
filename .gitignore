@@ -1,0 +1,8 @@
+build/
+test/out/
+*.user
+*.suo
+.vs/
+*.i
+*.rr
+*.rrc

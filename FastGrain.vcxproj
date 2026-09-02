@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7C2F1E5A-9B3D-4F61-A8E2-5D0C3B7F9A14}</ProjectGuid>
+    <RootNamespace>FastGrain</RootNamespace>
+    <ProjectName>FastGrain</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Release'">false</UseDebugLibraries>
+    <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">true</WholeProgramOptimization>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+
+  <PropertyGroup>
+    <!-- external tool locations; override on the msbuild command line with /p:Name=value -->
+    <AESDK Condition="'$(AESDK)'==''">$(MSBuildProjectDirectory)\..\AfterEffectsSDK_25.6_61_win\ae25.6_61.64bit.AfterEffectsSDK\Examples</AESDK>
+    <CudaRoot Condition="'$(CudaRoot)'==''">$(CUDA_PATH_V12_8)</CudaRoot>
+    <CudaRoot Condition="'$(CudaRoot)'==''">$(CUDA_PATH)</CudaRoot>
+    <DxcExe Condition="'$(DxcExe)'=='' and Exists('$(WindowsSdkVerBinPath)x64\dxc.exe')">$(WindowsSdkVerBinPath)x64\dxc.exe</DxcExe>
+    <DxcExe Condition="'$(DxcExe)'=='' and Exists('$(WindowsSdkDir)bin\$(WindowsTargetPlatformVersion)\x64\dxc.exe')">$(WindowsSdkDir)bin\$(WindowsTargetPlatformVersion)\x64\dxc.exe</DxcExe>
+    <DxcExe Condition="'$(DxcExe)'==''">C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\dxc.exe</DxcExe>
+    <CudaArch Condition="'$(CudaArch)'==''">-gencode arch=compute_75,code=sm_75 -gencode arch=compute_86,code=sm_86 -gencode arch=compute_89,code=sm_89 -gencode arch=compute_120,code=sm_120 -gencode arch=compute_89,code=compute_89</CudaArch>
+    <CudaHostFlags Condition="'$(Configuration)'=='Release'">/MD,/EHsc,/W3,/nologo</CudaHostFlags>
+    <CudaHostFlags Condition="'$(Configuration)'=='Debug'">/MDd,/EHsc,/W3,/nologo,/Zi</CudaHostFlags>
+    <CudaExtra Condition="'$(Configuration)'=='Release'">-use_fast_math -O3</CudaExtra>
+    <CudaExtra Condition="'$(Configuration)'=='Debug'">-use_fast_math -lineinfo -D_DEBUG</CudaExtra>
+
+    <OutDir>$(MSBuildProjectDirectory)\build\$(Configuration)\</OutDir>
+    <IntDir>$(MSBuildProjectDirectory)\build\obj\$(Configuration)\</IntDir>
+    <TargetName>FastGrain</TargetName>
+    <TargetExt>.aex</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\src;$(IntDir);$(AESDK)\Headers;$(AESDK)\Headers\SP;$(AESDK)\Util;$(CudaRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MSWindows;WIN32;_WINDOWS;NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <WarningLevel>Level3</WarningLevel>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
+      <Optimization Condition="'$(Configuration)'=='Release'">MaxSpeed</Optimization>
+      <Optimization Condition="'$(Configuration)'=='Debug'">Disabled</Optimization>
+      <IntrinsicFunctions Condition="'$(Configuration)'=='Release'">true</IntrinsicFunctions>
+      <FunctionLevelLinking Condition="'$(Configuration)'=='Release'">true</FunctionLevelLinking>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(CudaRoot)\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(IntDir)FastGrain_Kernels.obj;cudart_static.lib;d3d12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences Condition="'$(Configuration)'=='Release'">true</OptimizeReferences>
+      <EnableCOMDATFolding Condition="'$(Configuration)'=='Release'">true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ClCompile Include="src\FastGrain.cpp" />
+    <ClCompile Include="src\FastGrain_DX.cpp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClInclude Include="src\FastGrain.h" />
+    <ClInclude Include="src\FastGrain_Shared.h" />
+    <ClInclude Include="src\FastGrain_CUDA.h" />
+    <ClInclude Include="src\FastGrain_DX.h" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- CUDA kernels -->
+    <CustomBuild Include="src\FastGrain_Kernels.cu">
+      <FileType>Document</FileType>
+      <Message>nvcc: %(Filename).cu</Message>
+      <Command>"$(CudaRoot)\bin\nvcc.exe" $(CudaArch) $(CudaExtra) -m64 -c -ccbin "$(VC_ExecutablePath_x64_x64)" -Xcompiler "$(CudaHostFlags)" -I"$(CudaRoot)\include" -I"$(MSBuildProjectDirectory)\src" -o "$(IntDir)FastGrain_Kernels.obj" "%(FullPath)"</Command>
+      <Outputs>$(IntDir)FastGrain_Kernels.obj</Outputs>
+      <AdditionalInputs>$(MSBuildProjectDirectory)\src\FastGrain_Shared.h;$(MSBuildProjectDirectory)\src\FastGrain_CUDA.h</AdditionalInputs>
+      <LinkObjects>false</LinkObjects>
+    </CustomBuild>
+
+    <!-- DirectX compute shaders -> embedded byte arrays -->
+    <CustomBuild Include="src\FastGrain.hlsl">
+      <FileType>Document</FileType>
+      <Message>dxc: %(Filename).hlsl (4 entry points) + bin2h</Message>
+      <Command>if not exist "$(IntDir)dx" mkdir "$(IntDir)dx"
+"$(DxcExe)" "%(FullPath)" -E GenLattice -T cs_6_5 -O3 -I "$(MSBuildProjectDirectory)\src" -Fo "$(IntDir)dx\GenLattice.cso" -Frs "$(IntDir)dx\GenLattice.rs"
+"$(DxcExe)" "%(FullPath)" -E BlurH      -T cs_6_5 -O3 -I "$(MSBuildProjectDirectory)\src" -Fo "$(IntDir)dx\BlurH.cso"      -Frs "$(IntDir)dx\BlurH.rs"
+"$(DxcExe)" "%(FullPath)" -E BlurV      -T cs_6_5 -O3 -I "$(MSBuildProjectDirectory)\src" -Fo "$(IntDir)dx\BlurV.cso"      -Frs "$(IntDir)dx\BlurV.rs"
+"$(DxcExe)" "%(FullPath)" -E Composite  -T cs_6_5 -O3 -I "$(MSBuildProjectDirectory)\src" -Fo "$(IntDir)dx\Composite.cso"  -Frs "$(IntDir)dx\Composite.rs"
+powershell -NoProfile -ExecutionPolicy Bypass -File "$(MSBuildProjectDirectory)\tools\bin2h.ps1" -InputDir "$(IntDir)dx" -Output "$(IntDir)FastGrain_Shaders.h"</Command>
+      <Outputs>$(IntDir)FastGrain_Shaders.h;$(IntDir)dx\GenLattice.cso;$(IntDir)dx\BlurH.cso;$(IntDir)dx\BlurV.cso;$(IntDir)dx\Composite.cso</Outputs>
+      <AdditionalInputs>$(MSBuildProjectDirectory)\src\FastGrain_Shared.h;$(MSBuildProjectDirectory)\tools\bin2h.ps1</AdditionalInputs>
+      <LinkObjects>false</LinkObjects>
+    </CustomBuild>
+
+    <!-- PiPL resource -->
+    <CustomBuild Include="src\FastGrainPiPL.r">
+      <FileType>Document</FileType>
+      <Message>PiPL: %(Filename).r</Message>
+      <Command>"$(VC_ExecutablePath_x64_x64)\cl.exe" /nologo /I "$(AESDK)\Headers" /EP "%(FullPath)" &gt; "$(IntDir)FastGrainPiPL.rr"
+cd /d "$(IntDir)"
+"$(AESDK)\Resources\PiPLtool.exe" FastGrainPiPL.rr FastGrainPiPL.rrc
+"$(VC_ExecutablePath_x64_x64)\cl.exe" /nologo /D "MSWindows" /EP "$(IntDir)FastGrainPiPL.rrc" &gt; "$(IntDir)FastGrainPiPL.rc"</Command>
+      <Outputs>$(IntDir)FastGrainPiPL.rc</Outputs>
+      <LinkObjects>false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ResourceCompile Include="$(IntDir)FastGrainPiPL.rc" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
