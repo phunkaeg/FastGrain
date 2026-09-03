@@ -60,3 +60,7 @@ Override tool locations with `/p:` style properties, e.g. `msbuild FastGrain.vcx
 
 - OpenCL and Metal are not implemented; AE falls back to the CPU path automatically.
 - The PiPL flag values in `src\FastGrainPiPL.r` must match `FG_OUT_FLAGS*` in `src\FastGrain.h`.
+
+## License
+
+MIT, see [LICENSE](LICENSE). The After Effects SDK is Adobe's and is not included.
